@@ -58,24 +58,27 @@ Generated automatically by indexing and matching **MESSIDOR raw fundus images** 
 
 ### 2. Exploratory Data Analysis (`step02_eda.ipynb`)
 Analyzed the completeness, distribution, and quality of the matched dataset.
-* Investigated pixel area proportions for disease classes.
-* Validated multi-class occurrences (minimum 2 anatomical classes per image).
-* Generated automated visual audits (Overlay Presentations) to verify mask alignments.
-* **Outputs:** Exported to `EDA_Results/`.
+* **Target Class Distribution:** Investigated pixel area proportions for disease classes, revealing extremely small lesion footprints relative to the overall image scale.
+* **Class Occurrence Validation:** Validated multi-class occurrences (minimum 2 anatomical classes per image).
+* **Visual Audit:** Generated automated visual audits (Overlay Presentations) to verify mask alignments.
+* **Impact & Conclusion:** The analysis proved that direct downscaling would obliterate small lesions (e.g., Microaneurysms), justifying the critical need for a "Tight Crop" step prior to resizing.
+* **Outputs:** Exported analytical plots and CSV summaries to `EDA_Results/`.
 
 ### 3. Data Preprocessing (`step03_preprocessing.ipynb`)
-Standardized the dataset for model training.
-* **Auto-Cropping & Square Padding:** Removed dark borders and applied padding to prevent aspect ratio distortion.
-* **Resizing:** Scaled to `512x512` (Images via `INTER_CUBIC`, Masks via `INTER_NEAREST`).
-* **Illumination Correction & CLAHE:** Enhanced lesion contrast across all fundus images.
-* **Multi-Channel Masking:** Stacked binary masks into a single `.npy` array per image.
-* **Outputs:** Exported to `Processed_Dataset/`.
+Standardized the dataset for model training to maximize pixel utilization and enhance feature extractability.
+* **Auto-Cropping & Square Padding:** Removed non-informative dark borders (dead space) and applied padding to prevent aspect ratio distortion.
+* **Resizing:** Scaled all images and masks to `512x512` without structural distortion (Images via `INTER_CUBIC`, Masks via `INTER_NEAREST`).
+* **Illumination Correction & CLAHE:** Equalized background lighting and highly contrasted the lesions across all fundus images.
+* **Multi-Channel Masking:** Stacked binary masks into a single `.npy` array per image, reducing computational burden.
+* **Impact & Conclusion:** Eliminated dead space, saving compute resources and ensuring model efficiency while maintaining the integrity of tiny lesions.
+* **Outputs:** Preprocessed images (`Processed_Dataset/images/`) and stacked multi-channel masks (`Processed_Dataset/masks_multichannel/`).
 
 ### 4. Dataset Stratification and Splitting (`step04_train_test_split.ipynb`)
-Safely divided the preprocessed dataset into Training, Validation, and Testing sets.
+Safely divided the preprocessed dataset to establish a robust and reliable evaluation benchmark.
 * **Multi-label Stratification:** Ensured proportional distribution of diseases across splits using binary concatenation keys (e.g., "11010").
 * **Rare Class Isolation:** Prevented the loss of rare lesion presentations by forcefully assigning single-occurrence groups to the Training set.
-* **Split Ratio:** **70% Train** / **15% Validation** / **15% Testing**.
+* **Split Ratio:** Strictly separated sets with zero data overlap (**70% Train** / **15% Validation** / **15% Testing**).
+* **Impact & Conclusion:** Eliminates Data Leakage (memorization) and guarantees that Validation metrics accurately guide hyperparameter tuning.
 * **Outputs:** Exported index references to `train_split.csv`, `val_split.csv`, and `test_split.csv`.
 * **Cloud Export:** Automatically compresses the entire `Processed_Dataset/` into a single `MAPLES_DR_Preprocessed.zip` archive for seamless upload to Kaggle/Colab.
 
