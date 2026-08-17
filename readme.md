@@ -50,3 +50,14 @@ The dataset exploration and visual analysis are handled in `step02_eda.ipynb`. T
 * **Visual Audit (Overlay Presentation):** Implemented an automated visualization tool to plot "Hero Images" with color-coded transparency overlays, allowing researchers to visually verify the alignment of masks against raw fundus images side-by-side.
 
 All generated plots and statistical summaries (CSVs) from this phase are automatically exported to the `EDA_Results/` directory.
+
+## 4. Data Preprocessing
+The `step03_preprocessing.ipynb` pipeline prepares and standardizes the dataset for model training. The key operations performed include:
+
+* **Auto-Cropping & Square Padding:** Automatically removes excess black borders around the fundus and applies square padding to preserve the aspect ratio without distorting the eye shape.
+* **Resizing:** Standardizes all images and masks to a uniform `512x512` resolution (using `INTER_CUBIC` for images and `INTER_NEAREST` for masks to preserve binary lesion labels).
+* **Illumination Correction & CLAHE:** Enhances the contrast of lesions by correcting uneven background lighting and applying Contrast Limited Adaptive Histogram Equalization.
+* **Multi-Channel Mask Stacking:** Combines individual binary masks of the target classes into a single multi-channel `.npy` array per image, optimizing it for segmentation model inputs.
+* **Validation & Sanity Checks:** Analyzes absolute pixel loss vs. proportion preservation before and after the resize operation, ensuring tiny lesions (e.g., Microaneurysms) remain intact and properly aligned.
+
+All preprocessed images are saved in `Processed_Dataset/images/` and the stacked masks in `Processed_Dataset/masks_multichannel/`.
