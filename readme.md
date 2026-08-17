@@ -61,3 +61,13 @@ The `step03_preprocessing.ipynb` pipeline prepares and standardizes the dataset 
 * **Validation & Sanity Checks:** Analyzes absolute pixel loss vs. proportion preservation before and after the resize operation, ensuring tiny lesions (e.g., Microaneurysms) remain intact and properly aligned.
 
 All preprocessed images are saved in `Processed_Dataset/images/` and the stacked masks in `Processed_Dataset/masks_multichannel/`.
+
+## 5. Dataset Stratification and Splitting
+The `step04_train_test_split.ipynb` handles the safe division of the preprocessed dataset into Training, Validation, and Testing sets while strictly maintaining the distribution of lesions. Key features include:
+
+* **Multi-label Stratification:** Groups images by concatenating the binary presence of all target classes (e.g., "11010") to guarantee proportional distribution across splits.
+* **Rare Class Isolation:** Isolates rare combinations (groups containing only 1 sample) and safely assigns them to the Training set to prevent the model from missing unique lesion presentations.
+* **Data Splitting Strategy:** Splits the remaining robust dataset into **70% Train**, **15% Validation**, and **15% Testing**.
+* **Visual Sanity Check:** Verifies the physical alignment of original masks against preprocessed `512x512` images for the most complex rare cases.
+
+The output splits are saved as references in `Processed_Dataset/train_split.csv`, `val_split.csv`, and `test_split.csv`, ready to be loaded by PyTorch DataLoaders.
