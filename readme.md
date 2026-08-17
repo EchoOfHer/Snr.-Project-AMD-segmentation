@@ -77,6 +77,7 @@ Safely divided the preprocessed dataset into Training, Validation, and Testing s
 * **Rare Class Isolation:** Prevented the loss of rare lesion presentations by forcefully assigning single-occurrence groups to the Training set.
 * **Split Ratio:** **70% Train** / **15% Validation** / **15% Testing**.
 * **Outputs:** Exported index references to `train_split.csv`, `val_split.csv`, and `test_split.csv`.
+* **Cloud Export:** Automatically compresses the entire `Processed_Dataset/` into a single `MAPLES_DR_Preprocessed.zip` archive for seamless upload to Kaggle/Colab.
 
 ---
 
