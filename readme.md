@@ -1,73 +1,103 @@
-# About Dataset
+# 🧠 Pre-Training Phase: MAPLES-DR Dataset Preparation for Retinal Analysis
 
-This project uses two main datasets:
+This repository handles the **data preparation and preprocessing phase** (Steps 01-04) of the **MESSIDOR dataset** and its **MAPLES-DR extension**. The primary objective is to clean, analyze, and structure the data locally before migrating to platforms like **Kaggle** for the actual Model Training phase.
 
-## 1. Raw Dataset
+---
 
-### MESSIDOR
-- Contains **1,200 raw Fundus images**
-- Image sets: **Base11 – Base14**
+## 📖 About the Dataset
 
-### MAPLES-DR
-- Contains **198 lesion segmentation images**
-- Includes **segmentation masks**
-- Divided into **Training** and **Testing** sets
-- Covers multiple **lesion classes**
+The **MESSIDOR dataset** is a widely used medical imaging dataset for studying **diabetic retinopathy (DR)**. It contains high-resolution **color fundus images** along with diagnostic labels.
 
-## 2. Matched & Integrated Dataset (`MAPLES_Matched`)
-Generated automatically by `step01_matching_data.ipynb` by indexing and matching **MESSIDOR raw fundus images** with **MAPLES-DR expert annotations** using `Image_ID`.
+To enhance research in **segmentation and explainability**, this project utilizes **MAPLES-DR**, an extension of MESSIDOR that provides **pixel-wise annotations of retinal structures**.
 
-* **Total Verified Images:** **198 unique fundus images** (138 Train / 60 Test)
+---
+
+## 🔬 MAPLES-DR Extension
+
+**MAPLES-DR (MESSIDOR Anatomical and Pathological Labels for Explainable Screening of Diabetic Retinopathy)** is a public dataset that builds on MESSIDOR by adding:
+
+* 🧠 Expert annotations from **retinologists**
+* 🧩 Pixel-level segmentation maps
+* 🔍 Labels for **10 retinal structures**, including:
+  * Optic disc & cup
+  * Macula
+  * Blood vessels
+  * Microaneurysms
+  * Hemorrhages
+  * Exudates
+  * Cotton wool spots
+  * Drusen
+  * Neovascularization
+
+It contains annotations for **198 MESSIDOR images** and is designed to improve **model explainability and reliability in DR screening**.
+
+⚠️ **Note:**
+* MAPLES-DR **does not include the original fundus images**.
+* The raw MESSIDOR images were downloaded separately and aligned with the labels via our preprocessing pipeline.
+
+---
+
+## 🎯 Purpose of This Pre-Training Repository
+
+This local repository is exclusively designed to execute the **Data Engineering Workflow**:
+* 📂 **Organize:** Provide a highly structured and matched dataset directory.
+* 🧪 **Analyze:** Perform deep Exploratory Data Analysis (EDA) on pixel areas and lesion distributions.
+* ⚙️ **Preprocess:** Standardize images via Auto-cropping, CLAHE illumination correction, and 512x512 resizing.
+* 🔀 **Stratify:** Safely split the dataset (Train/Val/Test) while preserving rare lesion occurrences.
+
+Once this pipeline completes, the `Processed_Dataset/` is ready to be uploaded to Cloud Platforms (e.g., Kaggle, Colab) for deep learning.
+
+---
+
+## 🚀 Pre-Training Pipeline Steps
+
+### 1. Matched & Integrated Dataset (`step01_matching_data.ipynb`)
+Generated automatically by indexing and matching **MESSIDOR raw fundus images** with **MAPLES-DR expert annotations** using `Image_ID`.
+* **Total Verified Images:** **198 unique fundus images**
 * **Total Lesion Classes:** **12 classes**
 
-### 📁 Directory Structure
-```text
-MAPLES_Matched/
-├── images/                  # 198 matched raw fundus images (.tif / .jpg)
-└── masks/                   # Binary segmentation masks (.png) grouped by class
-    ├── BrightUncertains/
-    ├── CottonWoolSpots/
-    ├── Drusens/
-    ├── Exudates/
-    ├── Hemorrhages/
-    ├── Macula/
-    ├── Microaneurysms/
-    ├── Neovascularization/
-    ├── OpticCup/
-    ├── OpticDisc/
-    ├── RedUncertains/
-    └── Vessels/
+### 2. Exploratory Data Analysis (`step02_eda.ipynb`)
+Analyzed the completeness, distribution, and quality of the matched dataset.
+* Investigated pixel area proportions for disease classes.
+* Validated multi-class occurrences (minimum 2 anatomical classes per image).
+* Generated automated visual audits (Overlay Presentations) to verify mask alignments.
+* **Outputs:** Exported to `EDA_Results/`.
+
+### 3. Data Preprocessing (`step03_preprocessing.ipynb`)
+Standardized the dataset for model training.
+* **Auto-Cropping & Square Padding:** Removed dark borders and applied padding to prevent aspect ratio distortion.
+* **Resizing:** Scaled to `512x512` (Images via `INTER_CUBIC`, Masks via `INTER_NEAREST`).
+* **Illumination Correction & CLAHE:** Enhanced lesion contrast across all fundus images.
+* **Multi-Channel Masking:** Stacked binary masks into a single `.npy` array per image.
+* **Outputs:** Exported to `Processed_Dataset/`.
+
+### 4. Dataset Stratification and Splitting (`step04_train_test_split.ipynb`)
+Safely divided the preprocessed dataset into Training, Validation, and Testing sets.
+* **Multi-label Stratification:** Ensured proportional distribution of diseases across splits using binary concatenation keys (e.g., "11010").
+* **Rare Class Isolation:** Prevented the loss of rare lesion presentations by forcefully assigning single-occurrence groups to the Training set.
+* **Split Ratio:** **70% Train** / **15% Validation** / **15% Testing**.
+* **Outputs:** Exported index references to `train_split.csv`, `val_split.csv`, and `test_split.csv`.
+
+---
+
+## 📚 References
+
+### 📌 MESSIDOR
+Decencière et al., *Feedback on a publicly distributed database: the MESSIDOR database*, Image Analysis & Stereology, 2014.
+
+### 📌 MAPLES-DR
+Lepetit-Aimon et al., *MAPLES-DR: MESSIDOR Anatomical and Pathological Labels for Explainable Screening of Diabetic Retinopathy*, Scientific Data, 2024.
+
+### 📄 BibTeX
+```bibtex
+@article{maples_dr,
+  title={MAPLES-DR: MESSIDOR Anatomical and Pathological Labels for Explainable Screening of Diabetic Retinopathy},
+  author={Lepetit-Aimon, Gabriel and Playout, Clément and Boucher, Marie Carole and Duval, Renaud and Brent, Michael H and Cheriet, Farida},
+  journal={Scientific Data},
+  volume={11},
+  number={1},
+  pages={914},
+  year={2024},
+  doi={10.1038/s41597-024-03739-6}
+}
 ```
-## 3. Exploratory Data Analysis (EDA)
-The dataset exploration and visual analysis are handled in `step02_eda.ipynb`. The main objectives and findings include:
-
-* **Image Resolution & Properties Analysis:** Summarized the physical characteristics and resolutions of the fundus images.
-* **Target Class Distribution:** Analyzed the occurrence of 5 primary target classes (`OpticDisc`, `Macula`, `Exudates`, `Hemorrhages`, `Drusens`).
-* **Lesion Area Percentage:** Investigated the relative pixel area size of disease/lesion classes to understand the scale of abnormalities (excluding normal anatomy like Optic Disc and Macula).
-* **Class Occurrence & Combinations:**
-  * Verified dataset integrity by ensuring all images contain the base anatomical structures (minimum 2 classes per image).
-  * Analyzed the most frequent combinations of lesions appearing together in a single eye.
-* **Visual Audit (Overlay Presentation):** Implemented an automated visualization tool to plot "Hero Images" with color-coded transparency overlays, allowing researchers to visually verify the alignment of masks against raw fundus images side-by-side.
-
-All generated plots and statistical summaries (CSVs) from this phase are automatically exported to the `EDA_Results/` directory.
-
-## 4. Data Preprocessing
-The `step03_preprocessing.ipynb` pipeline prepares and standardizes the dataset for model training. The key operations performed include:
-
-* **Auto-Cropping & Square Padding:** Automatically removes excess black borders around the fundus and applies square padding to preserve the aspect ratio without distorting the eye shape.
-* **Resizing:** Standardizes all images and masks to a uniform `512x512` resolution (using `INTER_CUBIC` for images and `INTER_NEAREST` for masks to preserve binary lesion labels).
-* **Illumination Correction & CLAHE:** Enhances the contrast of lesions by correcting uneven background lighting and applying Contrast Limited Adaptive Histogram Equalization.
-* **Multi-Channel Mask Stacking:** Combines individual binary masks of the target classes into a single multi-channel `.npy` array per image, optimizing it for segmentation model inputs.
-* **Validation & Sanity Checks:** Analyzes absolute pixel loss vs. proportion preservation before and after the resize operation, ensuring tiny lesions (e.g., Microaneurysms) remain intact and properly aligned.
-
-All preprocessed images are saved in `Processed_Dataset/images/` and the stacked masks in `Processed_Dataset/masks_multichannel/`.
-
-## 5. Dataset Stratification and Splitting
-The `step04_train_test_split.ipynb` handles the safe division of the preprocessed dataset into Training, Validation, and Testing sets while strictly maintaining the distribution of lesions. Key features include:
-
-* **Multi-label Stratification:** Groups images by concatenating the binary presence of all target classes (e.g., "11010") to guarantee proportional distribution across splits.
-* **Rare Class Isolation:** Isolates rare combinations (groups containing only 1 sample) and safely assigns them to the Training set to prevent the model from missing unique lesion presentations.
-* **Data Splitting Strategy:** Splits the remaining robust dataset into **70% Train**, **15% Validation**, and **15% Testing**.
-* **Visual Sanity Check:** Verifies the physical alignment of original masks against preprocessed `512x512` images for the most complex rare cases.
-
-The output splits are saved as references in `Processed_Dataset/train_split.csv`, `val_split.csv`, and `test_split.csv`, ready to be loaded by PyTorch DataLoaders.
